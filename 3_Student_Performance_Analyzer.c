@@ -4,31 +4,33 @@ struct Student
 {
     int rollNumber;
     char name[50];
-    float marks1, marks2, marks3;
+    float subjectOneMarks;
+    float subjectTwoMarks;
+    float subjectThreeMarks;
     float totalMarks;
     float averageMarks;
     char grade;
 };
 
-float calculateTotal(float m1, float m2, float m3) 
+float calculateTotal(float subjectOneMarks, float subjectTwoMarks, float subjectThreeMarks) 
 {
-    return m1 + m2 + m3;
+    return subjectOneMarks + subjectTwoMarks + subjectThreeMarks;
 }
 
-float calculateAverage(float total)
- {
-    return total / 3.0;
+float calculateAverage(float totalMarks)
+{
+    return totalMarks / 3.0;
 }
 
-char assignGrade(float average)
- {
-    if (average >= 85)
+char assignGrade(float averageMarks)
+{
+    if (averageMarks >= 85)
         return 'A';
-    else if (average >= 70)
+    else if (averageMarks >= 70)
         return 'B';
-    else if (average >= 50)
+    else if (averageMarks >= 50)
         return 'C';
-    else if (average >= 35)
+    else if (averageMarks >= 35)
         return 'D';
     else
         return 'F';
@@ -41,21 +43,20 @@ void displayPerformancePattern(char grade)
     switch (grade) 
     {
         case 'A': 
-        stars = 5; 
-        break;
+            stars = 5; 
+            break;
         case 'B':
-         stars = 4;
-          break;
+            stars = 4;
+            break;
         case 'C': 
-        stars = 3;
-         break;
+            stars = 3;
+            break;
         case 'D': 
-        stars = 2;
-         break;
-
+            stars = 2;
+            break;
         default: 
-        stars = 0;
-         break;
+            stars = 0;
+            break;
     }
 
     if (grade == 'F') 
@@ -70,34 +71,32 @@ void displayPerformancePattern(char grade)
     printf("\n");
 }
 
-void printRollNumbersRecursively(int current, int total) 
+void printRollNumbersRecursively(int currentRollNumber, int totalStudents) 
 {
-    if (current > total)
-     {
+    if (currentRollNumber > totalStudents)
+    {
         return;
     }
 
-
-    printf("%d ", current);
-    printRollNumbersRecursively(current + 1, total);
+    printf("%d ", currentRollNumber);
+    printRollNumbersRecursively(currentRollNumber + 1, totalStudents);
 }
 
 int main()
- {
+{
     int studentCount;
 
-    printf("Enter number of students ");
+    printf("Enter number of students: ");
     scanf("%d", &studentCount);
 
     struct Student students[studentCount];
 
     for (int i = 0; i < studentCount; i++) 
     {
-        printf("\nEnter details for Student %d (Roll Name Marks1 Marks2 Marks3):\n", i + 1);
-        scanf("%d %s %f %f %f", &students[i].rollNumber, students[i].name,
-              &students[i].marks1, &students[i].marks2, &students[i].marks3);
+        printf("\nEnter details for Student %d (RollNumber Name Subject1 Subject2 Subject3):\n", i + 1);
+        scanf("%d %s %f %f %f", &students[i].rollNumber,  students[i].name, &students[i].subjectOneMarks,  &students[i].subjectTwoMarks,  &students[i].subjectThreeMarks);
 
-        students[i].totalMarks = calculateTotal(students[i].marks1, students[i].marks2, students[i].marks3);
+        students[i].totalMarks = calculateTotal(students[i].subjectOneMarks, students[i].subjectTwoMarks, students[i].subjectThreeMarks);
         students[i].averageMarks = calculateAverage(students[i].totalMarks);
         students[i].grade = assignGrade(students[i].averageMarks);
     }
@@ -105,12 +104,11 @@ int main()
     printf("\n Student Performance Report \n");
 
     for (int i = 0; i < studentCount; i++)
-     {
-        printf("\nRoll: %d\n", students[i].rollNumber);
+    {
+        printf("\nRoll Number: %d\n", students[i].rollNumber);
         printf("Name: %s\n", students[i].name);
-        printf("Total: %.2f\n", students[i].totalMarks);
-        printf("Average: %.2f\n", students[i].averageMarks);
-
+        printf("Total Marks: %.2f\n", students[i].totalMarks);
+        printf("Average Marks: %.2f\n", students[i].averageMarks);
         printf("Grade: %c\n", students[i].grade);
 
         if (students[i].grade == 'F') 
@@ -119,10 +117,13 @@ int main()
         }
 
         printf("Performance: ");
+
+        
         displayPerformancePattern(students[i].grade);
     }
 
     printf("\nList of Roll Numbers (via recursion): ");
+    
     printRollNumbersRecursively(1, studentCount);
 
     return 0;
