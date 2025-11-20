@@ -1,54 +1,56 @@
+#include <stdio.h>
 #include "player.h"
 
 float calculatePerformanceIndex(PlayerData* player) {
-    if (player == NULL) return 0.0f;
+    float score = 0.0;
 
-    switch (player->role) {
-        case ROLE_BATSMAN:
-            return (player->battingAverage * player->strikeRate) / 100.0f;
-        case ROLE_BOWLER:
-            return (player->wickets * 2) + (100.0f - player->economyRate);
-        case ROLE_ALLROUNDER:
-            return ((player->battingAverage * player->strikeRate) / 100.0f) + (player->wickets * 2);
-        default:
-            return 0.0f;
+    if (player->role == ROLE_BATSMAN) {
+        score = player->totalRuns +
+                player->battingAverage * 5 +
+                player->strikeRate * 0.5;
+    } else if (player->role == ROLE_BOWLER) {
+        score = player->wickets * 20 +
+                (player->economyRate > 0 ? 100 / player->economyRate : 0);
+    } else if (player->role == ROLE_ALLROUNDER) {
+        score = player->totalRuns +
+                player->battingAverage * 3 +
+                player->strikeRate * 0.2 +
+                player->wickets * 15 +
+                (player->economyRate > 0 ? 50 / player->economyRate : 0);
     }
+    return score;
+}
+
+void insertIntoSortedList(PlayerNode** head, PlayerNode* newNode) {
+    if (*head == NULL || newNode->data->performanceIndex > (*head)->data->performanceIndex) {
+        newNode->next = *head;
+        *head = newNode;
+        return;
+    }
+    PlayerNode* current = *head;
+    while (current->next != NULL &&
+           current->next->data->performanceIndex > newNode->data->performanceIndex) {
+        current = current->next;
+    }
+    newNode->next = current->next;
+    current->next = newNode;
 }
 
 const char* getRoleName(PlayerRole role) {
-    switch (role) {
+    switch(role) {
         case ROLE_BATSMAN: return "Batsman";
         case ROLE_BOWLER: return "Bowler";
-        case ROLE_ALLROUNDER: return "All-rounder";
+        case ROLE_ALLROUNDER: return "All-Rounder";
         default: return "Unknown";
     }
 }
 
-void printPlayer(PlayerData* player) {
-    if (player == NULL) return;
-    printf("| %-5d | %-20s | %-12s | %-6d | %-6.2f | %-7.2f | %-6d | %-6.2f | %-10.2f |\n",
-           player->playerId,
-           player->name,
-           getRoleName(player->role),
-           player->totalRuns,
-           player->battingAverage,
-           player->strikeRate,
-           player->wickets,
-           player->economyRate,
-           player->performanceIndex);
+void printPlayer(PlayerData* p) {
+    printf("ID: %d | Name: %s | Role: %s | PI: %.2f\n",
+           p->playerId, p->name, getRoleName(p->role), p->performanceIndex);
 }
 
-void printPlayerWithTeam(PlayerData* player) {
-    if (player == NULL) return;
-    printf("| %-5d | %-20s | %-12s | %-12s | %-6d | %-6.2f | %-7.2f | %-6d | %-6.2f | %-10.2f |\n",
-           player->playerId,
-           player->name,
-           player->teamName,
-           getRoleName(player->role),
-           player->totalRuns,
-           player->battingAverage,
-           player->strikeRate,
-           player->wickets,
-           player->economyRate,
-           player->performanceIndex);
+void printPlayerWithTeam(PlayerData* p) {
+    printf("ID: %d | Name: %s | Team: %s | Role: %s | PI: %.2f\n",
+           p->playerId, p->name, p->teamName, getRoleName(p->role), p->performanceIndex);
 }
