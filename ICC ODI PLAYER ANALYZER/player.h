@@ -1,73 +1,52 @@
-#ifndef PLAYERS_H
-#define PLAYERS_H
-
-#include <stdio.h>
+#ifndef PLAYER_H
+#define PLAYER_H
 
 typedef enum {
-    ROLE_BATSMAN = 1,
-    ROLE_BOWLER = 2,
-    ROLE_ALLROUNDER = 3
-} PlayerRole;
+    BATSMAN,
+    BOWLER,
+    ALL_ROUNDER,
+    WICKET_KEEPER
+} Role;
 
 typedef struct {
-    int playerId;
-    char name[51];
-    char teamName[51];
-    PlayerRole role;
-    int totalRuns;
-    float battingAverage;
-    float strikeRate;
+    int id;
+    char name[50];
+    Role role;
+    int runs;
     int wickets;
-    float economyRate;
+    float strikeRate;
+    float average;
     float performanceIndex;
 } PlayerData;
 
 typedef struct PlayerNode {
-    PlayerData* data;
+    PlayerData data;
     struct PlayerNode* next;
 } PlayerNode;
 
 typedef struct {
-    int teamId;
-    char name[51];
-    int totalPlayers;
-    double battingSRSum;
-    int battingSRCount;
+    char name[50];
+    PlayerNode* sortedListHead;
 
-    PlayerNode* all_players_list;
-    PlayerNode* batsmen_sorted_list;
-    PlayerNode* bowlers_sorted_list;
-    PlayerNode* allrounders_sorted_list;
+    float battingSRSum;
+    float bowlingEcoSum;
+    int battingSRCount;
+    int bowlingEcoCount;
 } Team;
 
-typedef struct {
-    PlayerData* player;
-    int team_index;
-    PlayerNode* next_node;
-} HeapNode;
-
-
 extern Team all_teams[10];
-
-float calculatePerformanceIndex(PlayerData* player);
-void insertIntoSortedList(PlayerNode** list_head, PlayerNode* new_node);
-PlayerNode** getSortedListHead(Team* team, PlayerRole role);
-void addPlayerToTeam(Team* team, PlayerData* new_player_data);
-Team* findTeamByName(const char* name);
-Team* findTeamById(int id);
-int compareTeamById(const void* a, const void* b);
+extern int teamCount;
 
 void initializeData();
-void cleanup();
+void insertIntoSortedList(PlayerNode** head, PlayerData player);
+void printPlayer(PlayerData p);
+void printPlayerWithTeam(PlayerData p, char* teamName);
+void printAllTeams();
 
-void swapHeapNodes(HeapNode* a, HeapNode* b);
-void maxHeapify(HeapNode heap[], int heapSize, int index);
-HeapNode extractMax(HeapNode heap[], int* heapSizePtr);
-void insertIntoHeap(HeapNode heap[], int* heapSizePtr, HeapNode new_node);
+void menu();
+Team* findTeamByName(char* name);
+void addPlayerToTeam(Team* team, PlayerData p);
 
+float calculatePerformanceIndex(PlayerData p);
 
-const char* getRoleName(PlayerRole role);
-void printPlayer(PlayerData* p);
-void printPlayerWithTeam(PlayerData* p);
-
-#endif 
+#endif
