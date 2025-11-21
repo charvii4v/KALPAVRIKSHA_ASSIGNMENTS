@@ -1,5 +1,4 @@
-#include "team.h"
-#include "player.h"
+#include "players.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -7,6 +6,21 @@
 #include "Players_data.h"
 
 Team all_teams[10];
+
+float calculatePerformanceIndex(PlayerData* player) {
+    if (player == NULL) return 0.0f;
+
+    switch (player->role) {
+        case ROLE_BATSMAN:
+            return (player->battingAverage * player->strikeRate) / 100.0f;
+        case ROLE_BOWLER:
+            return (player->wickets * 2) + (100.0f - player->economyRate);
+        case ROLE_ALLROUNDER:
+            return ((player->battingAverage * player->strikeRate) / 100.0f) + (player->wickets * 2);
+        default:
+            return 0.0f;
+    }
+}
 
 void insertIntoSortedList(PlayerNode** list_head, PlayerNode* new_node) {
     PlayerNode* current;
@@ -27,14 +41,11 @@ void insertIntoSortedList(PlayerNode** list_head, PlayerNode* new_node) {
 PlayerNode** getSortedListHead(Team* team, PlayerRole role) {
     if (!team) return NULL;
     switch (role) {
-        case ROLE_BATSMAN:
-            return &team->batsmen_sorted_list;
-        case ROLE_BOWLER:
-            return &team->bowlers_sorted_list;
-        case ROLE_ALLROUNDER:
-            return &team->allrounders_sorted_list;
+        case ROLE_BATSMAN: return &team->batsmen_sorted_list;
+        case ROLE_BOWLER: return &team->bowlers_sorted_list;
+        case ROLE_ALLROUNDER: return &team->allrounders_sorted_list;
+        default: return NULL;
     }
-    return NULL;
 }
 
 void addPlayerToTeam(Team* team, PlayerData* new_player_data) {
@@ -183,5 +194,55 @@ void cleanup() {
             current = current->next;
             free(nodeToFree);
         }
+    }
+}
+
+void swapHeapNodes(HeapNode* a, HeapNode* b) {
+    HeapNode tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
+
+void maxHeapify(HeapNode heap[], int heapSize, int index) {
+    int largestIndex = index;
+    int leftIndex = 2 * index + 1;
+    int rightIndex = 2 * index + 2;
+
+    if (leftIndex < heapSize && heap[leftIndex].player->performanceIndex > heap[largestIndex].player->performanceIndex) {
+        largestIndex = leftIndex;
+    }
+    if (rightIndex < heapSize && heap[rightIndex].player->performanceIndex > heap[largestIndex].player->performanceIndex) {
+        largestIndex = rightIndex;
+    }
+
+    if (largestIndex != index) {
+        swapHeapNodes(&heap[index], &heap[largestIndex]);
+        maxHeapify(heap, heapSize, largestIndex);
+    }
+}
+
+HeapNode extractMax(HeapNode heap[], int* heapSizePtr) {
+    if (*heapSizePtr <= 0) return (HeapNode){NULL, -1, NULL};
+
+    HeapNode maxNode = heap[0];
+    heap[0] = heap[*heapSizePtr - 1];
+    (*heapSizePtr)--;
+    maxHeapify(heap, *heapSizePtr, 0);
+    return maxNode;
+}
+
+void insertIntoHeap(HeapNode heap[], int* heapSizePtr, HeapNode new_node) {
+    if (*heapSizePtr == 10) {
+        
+        return;
+    }
+
+    (*heapSizePtr)++;
+    int currentIndex = *heapSizePtr - 1;
+    heap[currentIndex] = new_node;
+
+    while (currentIndex != 0 && heap[(currentIndex - 1) / 2].player->performanceIndex < heap[currentIndex].player->performanceIndex) {
+        swapHeapNodes(&heap[currentIndex], &heap[(currentIndex - 1) / 2]);
+        currentIndex = (currentIndex - 1) / 2;
     }
 }
