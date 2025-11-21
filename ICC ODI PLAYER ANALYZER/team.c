@@ -1,4 +1,4 @@
-#include "players.h"
+#include "player.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -246,3 +246,4 @@ void insertIntoHeap(HeapNode heap[], int* heapSizePtr, HeapNode new_node) {
         currentIndex = (currentIndex - 1) / 2;
     }
 }
+
