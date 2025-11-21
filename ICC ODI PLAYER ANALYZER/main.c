@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "players.h"
+#include "player.h"
 
 
 void handleAddPlayer();
@@ -334,3 +334,4 @@ int main() {
     cleanup();
     return 0;
 }
+
