@@ -5,11 +5,11 @@
 
 
 Node* createNode(int key, char* value) {
-    Node* n = (Node*)malloc(sizeof(Node));
-    n->key = key;
-    strcpy(n->value, value);
-    n->prev = n->next = NULL;
-    return n;
+    Node* LRU = (Node*)malloc(sizeof(Node));
+    LRU->key = key;
+    strcpy(LRU->value, value);
+    LRU->prev = LRU->next = NULL;
+    return LRU;
 }
 
 void addToHead(LRUCache* cache, Node* node) {
@@ -42,8 +42,8 @@ LRUCache* createCache(int capacity) {
     cache->size = 0;
     cache->head = cache->tail = NULL;
 
-    for (int i = 0; i < MAX_HASH; i++)
-        cache->hashMap[i] = NULL;
+    for (int index = 0; index < MAX_HASH; index++)
+        cache->hashMap[index] = NULL;
 
     return cache;
 }
