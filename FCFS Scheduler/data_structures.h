@@ -5,6 +5,7 @@
 
 #define PROCESS_NAME_MAX 64
 
+// structure to hold proccess control informatin
 typedef enum {
     PROCESS_STATE_NEW,
     PROCESS_STATE_READY,
@@ -32,6 +33,7 @@ typedef struct process_control_block {
     struct process_control_block *next;
 } process_control_block_t;
 
+// a simple FIFO queue for storing pointers to PCBs
 typedef struct pcb_queue {
     process_control_block_t *head;
     process_control_block_t *tail;
@@ -43,11 +45,13 @@ typedef struct kill_event {
     int kill_time;
 } kill_event_t;
 
+// array to store pending kill events
 typedef struct kill_event_array {
     kill_event_t *events;
     int count;
     int capacity;
 } kill_event_array_t;
+
 
 process_control_block_t *pcb_create(const char *name, int pid, int cpu_burst, int io_start, int io_duration);
 void pcb_free(process_control_block_t *pcb);
