@@ -156,3 +156,94 @@ process_control_block_t *find_pcb_in_queue(const pcb_queue_t *queue, int process
     }
     return NULL;
 }
+
+kill_event_array_t *kill_event_array_create(void)
+{
+    kill_event_array_t *array = (kill_event_array_t *) malloc(sizeof(kill_event_array_t));
+    if (array == NULL) {
+        perror("Failed to allocate kill_event_array");
+        exit(EXIT_FAILURE);
+    }
+    array->events = NULL;
+    array->count = 0;
+    array->capacity = 0;
+    return array;
+}
+
+void kill_event_array_destroy(kill_event_array_t *array)
+{
+    if (array == NULL) {
+        return;
+    }
+    free(array->events);
+    free(array);
+}
+
+void kill_event_array_add(kill_event_array_t *array, int target_process_id, int kill_time)
+{
+    ensure_kill_capacity(array);
+    array->events[array->count].target_process_id = target_process_id;
+    array->events[array->count].kill_time = kill_time;
+    array->count += 1;
+}
+
+kill_event_t *kill_event_array_pop_at_time(kill_event_array_t *array, int current_time, int *out_count)
+{
+    *out_count = 0;
+    if (array == NULL || array->count == 0) {
+        return NULL;
+    }
+
+    for (int outer_index = 0; outer_index < array->count - 1; ++outer_index) {
+        int min_index = outer_index;
+        for (int inner_index = outer_index + 1; inner_index < array->count; ++inner_index) {
+            if (array->events[inner_index].kill_time < array->events[min_index].kill_time) {
+                min_index = inner_index;
+            }
+        }
+        if (min_index != outer_index) {
+            kill_event_t temp = array->events[outer_index];
+            array->events[outer_index] = array->events[min_index];
+            array->events[min_index] = temp;
+        }
+    }
+    int match_start = -1;
+    for (int scan_index = 0; scan_index < array->count; ++scan_index) {
+        if (array->events[scan_index].kill_time == current_time) {
+            match_start = scan_index;
+            break;
+        }
+        if (array->events[scan_index].kill_time > current_time) {
+            break;
+        }
+    }
+    if (match_start == -1) {
+        return NULL;
+    }
+    int match_count = 0;
+    int scan_index = match_start;
+    while (scan_index < array->count && array->events[scan_index].kill_time == current_time) {
+        ++match_count;
+        ++scan_index;
+    }
+    kill_event_t *result = (kill_event_t *) malloc(sizeof(kill_event_t) * match_count);
+    if (result == NULL) {
+        perror("Failed to allocate pop result");
+        exit(EXIT_FAILURE);
+    }
+    for (int copy_index = 0; copy_index < match_count; ++copy_index) {
+        result[copy_index] = array->events[match_start + copy_index];
+    }
+    int dest_index = 0;
+    for (int src_index = match_start + match_count; src_index < array->count; ++src_index) {
+        array->events[dest_index++] = array->events[src_index];
+    }
+    array->count = dest_index;
+    *out_count = match_count;
+    return result;
+}
+
+bool kill_event_array_has_pending(const kill_event_array_t *array)
+{
+    return (array != NULL) && (array->count > 0);
+}
