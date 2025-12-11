@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdio.h>
 
+// this function doubles the array capcity when needed
 static void ensure_kill_capacity(kill_event_array_t *array)
 {
     if (array->count < array->capacity) {
@@ -18,6 +19,7 @@ static void ensure_kill_capacity(kill_event_array_t *array)
     array->capacity = new_capacity;
 }
 
+// creates a new process control block with intial values
 process_control_block_t *pcb_create(const char *name, int pid, int cpu_burst, int io_start, int io_duration)
 {
     process_control_block_t *new_pcb = (process_control_block_t *) malloc(sizeof(process_control_block_t));
@@ -49,6 +51,7 @@ void pcb_free(process_control_block_t *pcb)
     free(pcb);
 }
 
+// allocate memory for a new FIFO queu structure
 pcb_queue_t *pcb_queue_create(void)
 {
     pcb_queue_t *queue = (pcb_queue_t *) malloc(sizeof(pcb_queue_t));
@@ -62,6 +65,7 @@ pcb_queue_t *pcb_queue_create(void)
     return queue;
 }
 
+// free the queue but not the PCBs themself
 void pcb_queue_destroy(pcb_queue_t *queue)
 {
     if (queue == NULL) {
@@ -75,6 +79,8 @@ void pcb_queue_destroy(pcb_queue_t *queue)
     }
     free(queue);
 }
+
+
 
 void pcb_queue_enqueue(pcb_queue_t *queue, process_control_block_t *pcb)
 {
@@ -92,6 +98,8 @@ void pcb_queue_enqueue(pcb_queue_t *queue, process_control_block_t *pcb)
     queue->length += 1;
 }
 
+
+
 process_control_block_t *pcb_queue_dequeue(pcb_queue_t *queue)
 {
     if (queue == NULL || queue->head == NULL) {
@@ -107,10 +115,13 @@ process_control_block_t *pcb_queue_dequeue(pcb_queue_t *queue)
     return node;
 }
 
+
+
 bool pcb_queue_is_empty(const pcb_queue_t *queue)
 {
     return (queue == NULL) || (queue->head == NULL);
 }
+
 
 bool pcb_queue_remove_by_pid(pcb_queue_t *queue, int process_id)
 {
@@ -126,7 +137,8 @@ bool pcb_queue_remove_by_pid(pcb_queue_t *queue, int process_id)
                 if (queue->head == NULL) {
                     queue->tail = NULL;
                 }
-            } else {
+            } 
+            else {
                 previous_node->next = cursor->next;
                 if (previous_node->next == NULL) {
                     queue->tail = previous_node;
@@ -141,6 +153,7 @@ bool pcb_queue_remove_by_pid(pcb_queue_t *queue, int process_id)
     }
     return false;
 }
+
 
 process_control_block_t *find_pcb_in_queue(const pcb_queue_t *queue, int process_id)
 {
@@ -170,6 +183,8 @@ kill_event_array_t *kill_event_array_create(void)
     return array;
 }
 
+
+
 void kill_event_array_destroy(kill_event_array_t *array)
 {
     if (array == NULL) {
@@ -179,13 +194,17 @@ void kill_event_array_destroy(kill_event_array_t *array)
     free(array);
 }
 
+
 void kill_event_array_add(kill_event_array_t *array, int target_process_id, int kill_time)
 {
+
     ensure_kill_capacity(array);
     array->events[array->count].target_process_id = target_process_id;
     array->events[array->count].kill_time = kill_time;
     array->count += 1;
 }
+
+
 
 kill_event_t *kill_event_array_pop_at_time(kill_event_array_t *array, int current_time, int *out_count)
 {
@@ -242,6 +261,7 @@ kill_event_t *kill_event_array_pop_at_time(kill_event_array_t *array, int curren
     *out_count = match_count;
     return result;
 }
+
 
 bool kill_event_array_has_pending(const kill_event_array_t *array)
 {
