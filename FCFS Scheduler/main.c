@@ -9,6 +9,7 @@ void scheduler_run_main(void);
 void scheduler_print_report(void);
 void scheduler_set_terminated_queue(pcb_queue_t *);
 
+// trims whitespace from begining and end of string
 static void trim_whitespace(char *text)
 {
     if (text == NULL) return;
@@ -19,6 +20,8 @@ static void trim_whitespace(char *text)
     while (length > 0 && isspace((unsigned char) text[length - 1])) { text[length - 1] = '\0'; length--; }
 }
 
+
+// parses a line and extracts proccess paremeters from input
 static int parse_process(const char *line, char *out_name, int *out_pid, int *out_cpu, int *out_io_start, int *out_io_duration)
 {
     char name_token[PROCESS_NAME_MAX];
@@ -43,6 +46,7 @@ static int parse_process(const char *line, char *out_name, int *out_pid, int *ou
     }
     return 1;
 }
+
 
 int main(void)
 {
