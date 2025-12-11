@@ -8,6 +8,7 @@ static pcb_queue_t *waiting_queue = NULL;
 static pcb_queue_t *terminated_queue = NULL;
 static kill_event_array_t *kill_events = NULL;
 
+// initalizes all the global queue refernces for scheduler
 void scheduler_initialize_containers(pcb_queue_t *ready, pcb_queue_t *waiting, pcb_queue_t *terminated, kill_event_array_t *events)
 {
     ready_queue = ready;
@@ -16,6 +17,7 @@ void scheduler_initialize_containers(pcb_queue_t *ready, pcb_queue_t *waiting, p
     kill_events = events;
 }
 
+
 static bool remove_from_ready_or_waiting(int process_id)
 {
     bool removed_ready = pcb_queue_remove_by_pid(ready_queue, process_id);
@@ -23,6 +25,7 @@ static bool remove_from_ready_or_waiting(int process_id)
     return removed_ready || removed_waiting;
 }
 
+// moves a process to the terminted queue and clears it from active scehdule
 static void move_to_terminated(process_control_block_t *pcb, process_state_t final_state, int completion_time)
 {
     if (pcb == NULL) return;
@@ -31,6 +34,7 @@ static void move_to_terminated(process_control_block_t *pcb, process_state_t fin
     pcb->next = NULL;
     pcb_queue_enqueue(terminated_queue, pcb);
 }
+
 
 static void apply_kill_events_at_start_of_tick(int current_tick, process_control_block_t **running_pointer)
 {
@@ -74,6 +78,9 @@ static int update_waiting_io(void)
     pcb_queue_destroy(temporary);
 }
 
+
+
+// main sheduler loop - runs until all processes are compleat
 void scheduler_run_main(void)
 {
     int current_tick = 0;
@@ -139,9 +146,9 @@ void scheduler_run_main(void)
 void scheduler_print_report(void)
 {
     printf("\nFINAL REPORT\n");
-    printf("-------------------------------------------------------------\n");
+    printf("----\n");
     printf("| PID  | Process Name                | CPU  | IO  | Turnaround | Waiting |\n");
-    printf("-------------------------------------------------------------\n");
+    printf("----\n");
     while (!pcb_queue_is_empty(terminated_queue)) {
         process_control_block_t *pcb = pcb_queue_dequeue(terminated_queue);
         if (pcb == NULL) continue;
@@ -158,7 +165,7 @@ void scheduler_print_report(void)
         }
         free(pcb);
     }
-    printf("-------------------------------------------------------------\n");
+    printf("----\n");
 }
 
 void scheduler_set_terminated_queue(pcb_queue_t *terminated)
